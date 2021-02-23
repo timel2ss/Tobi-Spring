@@ -5,6 +5,7 @@ import domain.User;
 import java.sql.*;
 
 public abstract class UserDao {
+
     public void add(User user) throws ClassNotFoundException, SQLException {
         Connection c = getConnection();
 
