@@ -4,10 +4,9 @@ import domain.User;
 
 import java.sql.*;
 
-public class UserDao {
+public abstract class UserDao {
     public void add(User user) throws ClassNotFoundException, SQLException {
-        Class.forName("org.mariadb.jdbc.Driver");
-        Connection c = DriverManager.getConnection("jdbc:mariadb://localhost/tobi_spring", "root", "");
+        Connection c = getConnection();
 
         PreparedStatement psmt = c.prepareStatement("insert into users(id, name, password) values(?, ?, ?)");
         psmt.setString(1, user.getId());
@@ -21,8 +20,7 @@ public class UserDao {
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException {
-        Class.forName("org.mariadb.jdbc.Driver");
-        Connection c = DriverManager.getConnection("jdbc:mariadb://localhost/tobi_spring", "root", "");
+        Connection c = getConnection();
 
         PreparedStatement psmt = c.prepareStatement("select * from users where id = ?");
         psmt.setString(1, id);
@@ -42,8 +40,10 @@ public class UserDao {
         return user;
     }
 
+    public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
+
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        UserDao userDao = new UserDao();
+        DUserDao userDao = new DUserDao();
 
         User user = new User();
         user.setId("whiteship");
