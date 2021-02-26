@@ -2,24 +2,17 @@ import dao.UserDao;
 import domain.User;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "/applicationContext.xml")
-public class UserDaoTest {
-
-    @Autowired
+public class NoContainerUserDaoTest {
     private UserDao userDao;
 
     private User user1;
@@ -28,6 +21,10 @@ public class UserDaoTest {
 
     @Before
     public void setUp() {
+        userDao = new UserDao();
+        DataSource dataSource = new SingleConnectionDataSource("jdbc:mariadb://localhost/tobi_spring", "root", "", true);
+        userDao.setDataSource(dataSource);
+
         user1 = new User("gyumee", "박성철", "springno1");
         user2 = new User("leegw700", "이길원", "springno2");
         user3 = new User("bumjin", "박범진", "springno3");
