@@ -58,29 +58,64 @@ public class UserDao {
     }
 
     public void deleteAll() throws SQLException {
-        Connection c = dataSource.getConnection();
+        Connection c = null;
+        PreparedStatement psmt = null;
 
-        PreparedStatement psmt = c.prepareStatement("delete from users");
-
-        psmt.executeUpdate();
-
-        psmt.close();;
-        c.close();
+        try {
+            c = dataSource.getConnection();
+            psmt = c.prepareStatement("delete from users");
+            psmt.executeUpdate();
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if(psmt != null) {
+                try {
+                    psmt.close();
+                } catch (SQLException e) {
+                }
+            }
+            if(c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
     }
 
     public int getCount() throws SQLException {
-        Connection c = dataSource.getConnection();
+        Connection c = null;
+        PreparedStatement psmt = null;
+        ResultSet rs = null;
 
-        PreparedStatement psmt = c.prepareStatement("select count(*) from users");
+        try {
+            c = dataSource.getConnection();
+            psmt = c.prepareStatement("select count(*) from users");
 
-        ResultSet rs = psmt.executeQuery();
-        rs.next();
-        int count = rs.getInt(1);
-
-        rs.close();
-        psmt.close();
-        c.close();
-
-        return count;
+            rs = psmt.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            throw e;
+        } finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
+            }
+            if(psmt != null) {
+                try {
+                    psmt.close();
+                } catch (SQLException e) {
+                }
+            }
+            if(c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
     }
 }
