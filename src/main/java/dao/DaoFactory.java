@@ -1,7 +1,9 @@
 package dao;
 
+import domain.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
 
 import javax.sql.DataSource;
@@ -12,7 +14,13 @@ public class DaoFactory {
     public UserDao userDao() {
         UserDao userDao = new UserDao();
         userDao.setDataSource(dataSource());
+        userDao.setUserMapper(userMapper());
         return userDao;
+    }
+
+    @Bean
+    public RowMapper<User> userMapper() {
+        return new UserMapper();
     }
 
     @Bean
@@ -23,10 +31,5 @@ public class DaoFactory {
         dataSource.setUsername("root");
         dataSource.setPassword("");
         return dataSource;
-    }
-
-    @Bean
-    public ConnectionMaker connectionMaker() {
-        return new DConnectionMaker();
     }
 }
