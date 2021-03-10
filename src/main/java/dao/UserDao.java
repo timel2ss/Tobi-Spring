@@ -1,100 +1,49 @@
 package dao;
 
 import domain.User;
-import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class UserDao {
-    private DataSource dataSource;
-    private JdbcContext jdbcContext;
+    private final RowMapper<User> userMapper = new RowMapper<User>() {
+        public User mapRow(ResultSet rs, int i) throws SQLException {
+            User user = new User();
+            user.setId(rs.getString("id"));
+            user.setName(rs.getString("name"));
+            user.setPassword(rs.getString("password"));
+            return user;
+        }
+    };
+    private JdbcTemplate jdbcTemplate;
 
     public void setDataSource(DataSource dataSource) {
-        jdbcContext = new JdbcContext();
-        jdbcContext.setDataSource(dataSource);
-        this.dataSource = dataSource;
+        jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    public void add(final User user) throws SQLException {
-        jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-                PreparedStatement psmt = c.prepareStatement("insert into users(id, name, password) values(?, ?, ?)");
-                psmt.setString(1, user.getId());
-                psmt.setString(2, user.getName());
-                psmt.setString(3, user.getPassword());
-                return psmt;
-            }
-        });
+    public void add(final User user) {
+        jdbcTemplate.update("insert into users(id, name, password) values(?, ?, ?)", user.getId(), user.getName(), user.getPassword());
     }
 
-    public User get(String id) throws SQLException {
-        Connection c = dataSource.getConnection();
-
-        PreparedStatement psmt = c.prepareStatement("select * from users where id = ?");
-        psmt.setString(1, id);
-
-        ResultSet rs = psmt.executeQuery();
-
-        User user = null;
-        if(rs.next()) {
-            user = new User();
-            user.setId(rs.getString(1));
-            user.setName(rs.getString(2));
-            user.setPassword(rs.getString(3));
-        }
-
-        if(user == null) {
-            throw new EmptyResultDataAccessException(1);
-        }
-
-        rs.close();
-        psmt.close();
-        c.close();
-
-        return user;
+    public User get(String id) {
+        return jdbcTemplate.queryForObject("select * from users where id = ?",
+                new Object[]{id},
+                userMapper);
     }
 
-    public void deleteAll() throws SQLException {
-        jdbcContext.executeSql("delete from users");
+    public void deleteAll() {
+        jdbcTemplate.update("delete from users");
     }
 
-    public int getCount() throws SQLException {
-        Connection c = null;
-        PreparedStatement psmt = null;
-        ResultSet rs = null;
+    public int getCount() {
+        return jdbcTemplate.queryForInt("select count(*) from users");
+    }
 
-        try {
-            c = dataSource.getConnection();
-            psmt = c.prepareStatement("select count(*) from users");
-
-            rs = psmt.executeQuery();
-            rs.next();
-            return rs.getInt(1);
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if(rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if(psmt != null) {
-                try {
-                    psmt.close();
-                } catch (SQLException e) {
-                }
-            }
-            if(c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                }
-            }
-        }
+    public List<User> getAll() {
+        return jdbcTemplate.query("select * from users", userMapper);
     }
 }
