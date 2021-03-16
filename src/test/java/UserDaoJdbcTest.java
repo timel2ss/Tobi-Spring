@@ -1,4 +1,5 @@
 import dao.UserDao;
+import domain.Level;
 import domain.User;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +17,7 @@ import static org.junit.Assert.fail;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "/applicationContext.xml")
-public class UserDaoTest {
+public class UserDaoJdbcTest {
 
     @Autowired
     private UserDao userDao;
@@ -27,9 +28,9 @@ public class UserDaoTest {
 
     @Before
     public void setUp() {
-        user1 = new User("gyumee", "박성철", "springno1");
-        user2 = new User("leegw700", "이길원", "springno2");
-        user3 = new User("bumjin", "박범진", "springno3");
+        user1 = new User("gyumee", "박성철", "springno1", Level.BASIC, 1, 0);
+        user2 = new User("leegw700", "이길원", "springno2", Level.SILVER, 55, 10);
+        user3 = new User("bumjin", "박범진", "springno3", Level.GOLD, 100, 40);
     }
 
     @Test
@@ -42,12 +43,10 @@ public class UserDaoTest {
         assertThat(userDao.getCount(), is(2));
 
         User userGet1 = userDao.get(user1.getId());
-        assertThat(userGet1.getName(), is(user1.getName()));
-        assertThat(userGet1.getPassword(), is(user1.getPassword()));
+        checkSameUser(userGet1, user1);
 
         User userGet2 = userDao.get(user2.getId());
-        assertThat(userGet2.getName(), is(user2.getName()));
-        assertThat(userGet2.getPassword(), is(user2.getPassword()));
+        checkSameUser(userGet2, user2);
     }
 
     @Test(expected = EmptyResultDataAccessException.class)
@@ -100,9 +99,34 @@ public class UserDaoTest {
         checkSameUser(user2, users3.get(2));
     }
 
+    @Test
+    public void update() {
+        userDao.deleteAll();
+
+        userDao.add(user1);
+        userDao.add(user2);
+
+        user1.setName("오민규");
+        user1.setPassword("springno6");
+        user1.setLevel(Level.GOLD);
+        user1.setLogin(1000);
+        user1.setRecommend(999);
+
+        userDao.update(user1);
+
+        User user1update = userDao.get(user1.getId());
+        checkSameUser(user1, user1update);
+        User user2same = userDao.get(user2.getId());
+        checkSameUser(user2, user2same);
+
+    }
+
     private void checkSameUser(User user1, User user2) {
         assertThat(user1.getId(), is(user2.getId()));
         assertThat(user1.getName(), is(user2.getName()));
         assertThat(user1.getPassword(), is(user2.getPassword()));
+        assertThat(user1.getLevel(), is(user2.getLevel()));
+        assertThat(user1.getLogin(), is(user2.getLogin()));
+        assertThat(user1.getRecommend(), is(user2.getRecommend()));
     }
 }
