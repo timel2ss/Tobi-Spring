@@ -28,9 +28,9 @@ public class UserDaoJdbcTest {
 
     @Before
     public void setUp() {
-        user1 = new User("gyumee", "박성철", "springno1", Level.BASIC, 1, 0);
-        user2 = new User("leegw700", "이길원", "springno2", Level.SILVER, 55, 10);
-        user3 = new User("bumjin", "박범진", "springno3", Level.GOLD, 100, 40);
+        user1 = new User("gyumee", "박성철", "springno1", "emailAddress@email.com", Level.BASIC, 1, 0);
+        user2 = new User("leegw700", "이길원", "springno2", "emailAddress@email.com",Level.SILVER, 55, 10);
+        user3 = new User("bumjin", "박범진", "springno3","emailAddress@email.com", Level.GOLD, 100, 40);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class UserDaoJdbcTest {
         checkSameUser(user2, user2same);
 
     }
-
+    
     private void checkSameUser(User user1, User user2) {
         assertThat(user1.getId(), is(user2.getId()));
         assertThat(user1.getName(), is(user2.getName()));
