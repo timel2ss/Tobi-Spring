@@ -11,10 +11,14 @@
 
     <bean id="connectionMaker" class="dao.DConnectionMaker" />
 
-    <bean id="userService" class="service.UserService">
+    <bean id="userServiceImpl" class="service.UserServiceImpl">
         <property name="userDao" ref="userDao" />
-        <property name="transactionManager" ref="transactionManager" />
         <property name="mailSender" ref="mailSender" />
+    </bean>
+
+    <bean id="userService" class="service.UserServiceTx">
+        <property name="userService" ref="userServiceImpl" />
+        <property name="transactionManager" ref="transactionManager" />
     </bean>
 
     <bean id="userDao" class="dao.UserDaoJdbc">
